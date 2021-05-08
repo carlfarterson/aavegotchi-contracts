@@ -32,6 +32,13 @@ contract ERC721MarketplaceFacet is Modifiers {
         uint256 time
     );
 
+    event ERC721LowerListingPrice(
+        uint256 indexed listingId,
+        address indexed seller,
+        uint256 loweredPriceInWei,
+        uint256 time
+      );
+
     function getAavegotchiListing(uint256 _listingId) external view returns (ERC721Listing memory listing_, AavegotchiInfo memory aavegotchiInfo_) {
         listing_ = s.erc721Listings[_listingId];
         require(listing_.timeCreated != 0, "ERC721Marketplace: ERC721 listing does not exist");
@@ -185,6 +192,23 @@ contract ERC721MarketplaceFacet is Modifiers {
             // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
             LibERC20.transferFrom(s.ghstContract, owner, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
+    }
+
+    //new function to allow owner of listing to lower price without listingFeeInWei
+    function lowerListingPrice(uint256 _listingId, address _owner, uint256 _lowerPriceInWei) external {
+      ERC721Listing storage listing = s.erc721Listings[_listingId];
+      require(listing.seller == _owner, "ERC721Marketplace: owner not seller");
+      require(_lowerPriceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
+      require(_lowerPriceInWei < listing.priceInWei, "ERC721Marketplace: lowerPrice must be less than current price of listing");
+
+      listing.priceInWei = _lowerPriceInWei;
+
+      emit ERC721LowerListingPrice(
+          _listingId,
+          listing.seller,
+          listing.priceInWei,
+          block.timestamp
+      );
     }
 
     function cancelERC721ListingByToken(address _erc721TokenAddress, uint256 _erc721TokenId) external {
