@@ -40,8 +40,11 @@ describe('ERC721 Lower Listing Price', async function() {
     console.log("Owner Before Balance: ", beforeOwnerBalance.toString());
     // console.log("Hello");
 
+    let beforeListingInfo = await erc721Facet.getERC721Listing(80257);
+    console.log("Listing Info: ", beforeListingInfo.priceInWei.toString());
+
     //need to convert pricing to wei
-    let lowerPrice = ethers.utils.parseEther("2");
+    let lowerPrice = ethers.utils.parseEther("200");
     await erc721Facet.lowerListingPrice(80257, aavegotchiSeller, lowerPrice );
 
     let afterOwnerBalance = await ghstERC20.balanceOf(aavegotchiSeller);
@@ -49,5 +52,9 @@ describe('ERC721 Lower Listing Price', async function() {
 
     expect(beforeOwnerBalance.toString()).to.equal(afterOwnerBalance.toString());
 
+    let afterListingInfo = await erc721Facet.getERC721Listing(80257);
+    console.log("Listing Info: ", afterListingInfo.priceInWei.toString());
+
+    expect(lowerPrice).to.equal(afterListingInfo.priceInWei.toString());
   });
 });
