@@ -195,9 +195,10 @@ contract ERC721MarketplaceFacet is Modifiers {
     }
 
     //new function to allow owner of listing to lower price without listingFeeInWei
-    function lowerListingPrice(uint256 _listingId, address _owner, uint256 _lowerPriceInWei) external {
+    function lowerListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external {
       ERC721Listing storage listing = s.erc721Listings[_listingId];
-      require(listing.seller == _owner, "ERC721Marketplace: owner not seller");
+      address owner = LibMeta.msgSender();
+      require(listing.seller == owner, "ERC721Marketplace: owner not seller");
       require(listing.cancelled == false, "ERC721Marketplace: listing cancelled");
       require(_lowerPriceInWei >= 1e18, "ERC721Marketplace: price should be 1 GHST or larger");
       require(_lowerPriceInWei < listing.priceInWei, "ERC721Marketplace: lowerPrice must be less than current price of listing");

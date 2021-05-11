@@ -45,7 +45,7 @@ describe('ERC721 Lower Listing Price', async function() {
 
     //need to convert pricing to wei
     let lowerPrice = ethers.utils.parseEther("200");
-    await erc721Facet.lowerListingPrice(80257, aavegotchiSeller, lowerPrice );
+    await erc721Facet.lowerListingPrice(80257, lowerPrice );
 
     let afterOwnerBalance = await ghstERC20.balanceOf(aavegotchiSeller);
     console.log("Owner After Balance:  ", afterOwnerBalance.toString());
