@@ -49,7 +49,7 @@ async function main () {
   console.log('Deployed facet:', facet.address);
 
   const newFuncs = [
-    getSelector('function lowerListingPrice(uint256 _listingId, address _owner, uint256 _lowerPriceInWei) external');
+    getSelector('function lowerListingPrice(uint256 _listingId, address _owner, uint256 _lowerPriceInWei) external')
   ]
 
   let existingFuncs = getSelectors(facet);
@@ -70,7 +70,7 @@ async function main () {
       functionSelectors: newFuncs
     },
     {
-      facetAddress: shopFacet.address,
+      facetAddress: facet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingFuncs
     }
