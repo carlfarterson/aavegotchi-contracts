@@ -25,7 +25,8 @@ async function main () {
   const diamondAddress = '0x86935F11C86623deC8a25696E1C19a8659CbF95d';
 
   let signer;
-  let facet;
+  let erc721Facet;
+  let erc1155Facet;
   let owner = await (await ethers.getContractAt('OwnershipFacet', diamondAddress)).owner();
 
   const testing = ['hardhat', 'localhost'].includes(hre.network.name);
@@ -43,36 +44,41 @@ async function main () {
     throw Error('Incorrect network selected')
   }
 
-  const Facet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ERC721MarketplaceFacet.sol:ERC721MarketplaceFacet');
-  facet = await Facet.deploy();
-  await facet.deployed();
-  console.log('Deployed facet:', facet.address);
+  const ERC721Facet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ERC721MarketplaceFacet.sol:ERC721MarketplaceFacet');
+  erc721Facet = await ERC721Facet.deploy();
+  await erc721Facet.deployed();
+  console.log('Deployed facet:', erc721Facet.address);
 
-  const newFuncs = [
-    getSelector('function lowerListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external')
+  const ERC1155Facet = await ethers.getContractFactory('contracts/Aavegotchi/facets/ERC1155MarketplaceFacet.sol:ERC1155MarketplaceFacet');
+  erc1155Facet = await ERC1155Facet.deploy();
+  await erc1155Facet.deployed();
+  console.log('Deployed facet:', erc1155Facet.address);
+
+  const newERC721Funcs = [
+    getSelector('function lowerERC721ListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external')
   ]
 
-  let existingFuncs = getSelectors(facet);
-    for (const selector of newFuncs) {
-      if (!existingFuncs.includes(selector)) {
+  let existingERC721Funcs = getSelectors(erc721Facet);
+    for (const selector of newERC721Funcs) {
+      if (!existingERC721Funcs.includes(selector)) {
         throw Error(`Selector ${selector} not found`);
       }
     }
 
-  existingFuncs = existingFuncs.filter(selector => !newFuncs.includes(selector));
+  existingERC721Funcs = existingERC721Funcs.filter(selector => !newERC721Funcs.includes(selector));
 
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
     {
-      facetAddress: facet.address,
+      facetAddress: erc721Facet.address,
       action: FacetCutAction.Add,
-      functionSelectors: newFuncs
+      functionSelectors: newERC721Funcs
     },
     {
-      facetAddress: facet.address,
+      facetAddress: erc721Facet.address,
       action: FacetCutAction.Replace,
-      functionSelectors: existingFuncs
+      functionSelectors: existingERC721Funcs
     }
   ]
   console.log(cut);

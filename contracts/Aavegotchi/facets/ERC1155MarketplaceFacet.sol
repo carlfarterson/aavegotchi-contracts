@@ -36,6 +36,13 @@ contract ERC1155MarketplaceFacet is Modifiers {
         uint256 time
     );
 
+    event ERC1155LowerListingPrice(
+        uint256 indexed listingId,
+        address indexed seller,
+        uint256 loweredPriceInWei,
+        uint256 time
+      );
+
     event ERC1155ListingCancelled(uint256 indexed listingId);
 
     event ChangedListingFee(uint256 listingFeeInWei);
@@ -171,6 +178,24 @@ contract ERC1155MarketplaceFacet is Modifiers {
             // burn address: address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF)
             LibERC20.transferFrom(s.ghstContract, LibMeta.msgSender(), address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), s.listingFeeInWei);
         }
+    }
+
+    function lowerERC1155ListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external {
+      ERC1155Listing storage listing = s.erc1155Listings[_listingId];
+      address owner = LibMeta.msgSender();
+      require(listing.seller == owner, "ERC1155Marketplace: owner not seller");
+      require(listing.cancelled == false, "ERC1155Marketplace: listing cancelled");
+      require(_lowerPriceInWei >= 1e18, "ERC1155Marketplace: price should be 1 GHST or larger");
+      require(_lowerPriceInWei < listing.priceInWei, "ERC1155Marketplace: lowerPrice must be less than current price of listing");
+
+      listing.priceInWei = _lowerPriceInWei;
+
+      emit ERC1155LowerListingPrice(
+          _listingId,
+          listing.seller,
+          listing.priceInWei,
+          block.timestamp
+      );
     }
 
     function cancelERC1155Listing(uint256 _listingId) external {

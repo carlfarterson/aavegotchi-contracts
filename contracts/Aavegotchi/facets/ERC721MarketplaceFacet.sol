@@ -195,7 +195,7 @@ contract ERC721MarketplaceFacet is Modifiers {
     }
 
     //new function to allow owner of listing to lower price without listingFeeInWei
-    function lowerListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external {
+    function lowerERC721ListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external {
       ERC721Listing storage listing = s.erc721Listings[_listingId];
       address owner = LibMeta.msgSender();
       require(listing.seller == owner, "ERC721Marketplace: owner not seller");

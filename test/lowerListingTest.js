@@ -1,5 +1,5 @@
 const { expect } = require('chai');
-const { erc721LowerPrice } = require('../scripts/upgrades/upgrade-ERC721LowerListingPrice.js');
+const { erc721LowerPrice } = require('../scripts/upgrades/upgrade-LowerListingPrice.js');
 
 describe('ERC721 Lower Listing Price', async function() {
   this.timeout(300000);
@@ -45,7 +45,7 @@ describe('ERC721 Lower Listing Price', async function() {
 
     //need to convert pricing to wei
     let lowerPrice = ethers.utils.parseEther("200");
-    await erc721Facet.lowerListingPrice(80257, lowerPrice );
+    await erc721Facet.lowerERC721ListingPrice(80257, lowerPrice );
 
     let afterOwnerBalance = await ghstERC20.balanceOf(aavegotchiSeller);
     console.log("Owner After Balance:  ", afterOwnerBalance.toString());
