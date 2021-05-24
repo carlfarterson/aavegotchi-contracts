@@ -67,6 +67,19 @@ async function main () {
 
   existingERC721Funcs = existingERC721Funcs.filter(selector => !newERC721Funcs.includes(selector));
 
+  const newERC1155Funcs = [
+    getSelector('function lowerERC1155ListingPrice(uint256 _listingId, uint256 _lowerPriceInWei) external')
+  ]
+
+  let existingERC1155Funcs = getSelectors(erc1155Facet);
+    for(const selector of newERC1155Funcs) {
+      if(!existingERC1155Funcs.includes(selector)){
+        throw Error(`Selector ${selector} not found`);
+      }
+    }
+
+  existingERC1155Funcs = existingERC1155Funcs.filter(selector => !newERC1155Funcs.includes(selector));
+
   const FacetCutAction = { Add: 0, Replace: 1, Remove: 2 }
 
   const cut = [
@@ -79,6 +92,16 @@ async function main () {
       facetAddress: erc721Facet.address,
       action: FacetCutAction.Replace,
       functionSelectors: existingERC721Funcs
+    },
+    {
+      facetAddress: erc1155Facet.address,
+      action: FacetCutAction.Add,
+      functionSelectors: newERC1155Funcs
+    },
+    {
+      facetAddress: erc1155Facet.address,
+      action: FacetCutAction.Replace,
+      functionSelectors: existingERC1155Funcs
     }
   ]
   console.log(cut);
