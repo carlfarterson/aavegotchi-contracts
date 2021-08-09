@@ -5,6 +5,7 @@ import {AppStorage, ItemType, Haunt} from "../libraries/LibAppStorage.sol";
 import {LibAavegotchi} from "../libraries/LibAavegotchi.sol";
 // import "hardhat/console.sol";
 import {IERC20} from "../../shared/interfaces/IERC20.sol";
+import {IERC1155} from "../../shared/interfaces/IERC1155.sol";
 import {LibERC721} from "../../shared/libraries/LibERC721.sol";
 import {LibERC1155} from "../../shared/libraries/LibERC1155.sol";
 import {LibItems} from "../libraries/LibItems.sol";
@@ -21,6 +22,13 @@ contract ShopFacet {
         uint256 _tokenId,
         uint256 _numAavegotchisToPurchase,
         uint256 _totalPrice
+    );
+
+    event MintPortalsFromVoucher(
+        address indexed _to,
+        uint256 _tokenId,
+        uint256 _numAavegotchisToPurchase,
+        uint256 _hauntId
     );
 
     event PurchaseItemsWithGhst(address indexed _buyer, address indexed _to, uint256[] _itemIds, uint256[] _quantities, uint256 _totalPrice);
@@ -73,6 +81,36 @@ contract ShopFacet {
         s.tokenIdCounter = tokenId;
        // LibAavegotchi.verify(tokenId);
         LibAavegotchi.purchase(sender, totalPrice);
+    }
+
+    function mintPortalsFromVoucher(uint256 _id, uint256 _amount) external {
+        require(_amount <= 20, "ShopFacet: Can't mint more than 20 at once");
+        address sender = LibMeta.msgSender();
+
+        uint256 voucherBalance = IERC1155(s.voucherContract).balanceOf(sender, _id);
+        require(voucherBalance >= _amount, "ShopFacet: Not enough ERC1155");
+
+        uint256 currentHauntId = s.currentHauntId;
+        Haunt storage haunt = s.haunts[currentHauntId];
+        uint256 hauntCount = haunt.totalCount + _amount;
+        require(hauntCount <= haunt.hauntMaxSize, "ShopFacet: Exceeded max number of aavegotchis for this haunt");
+        s.haunts[currentHauntId].totalCount = uint24(hauntCount);
+        uint32 tokenId = s.tokenIdCounter;
+        emit MintPortalsFromVoucher(sender, tokenId, _amount, currentHauntId);
+        for (uint256 i; i < _amount; i++) {
+            s.aavegotchis[tokenId].owner = sender;
+            s.aavegotchis[tokenId].hauntId = uint16(currentHauntId);
+            s.tokenIdIndexes[tokenId] = s.tokenIds.length;
+            s.tokenIds.push(tokenId);
+            s.ownerTokenIdIndexes[sender][tokenId] = s.ownerTokenIds[sender].length;
+            s.ownerTokenIds[sender].push(tokenId);
+            emit LibERC721.Transfer(address(0), sender, tokenId);
+            tokenId++;
+        }
+        s.tokenIdCounter = tokenId;
+
+        // burn erc1155
+        IERC1155(s.voucherContract).safeTransferFrom(sender, address(0), _id, _amount, new bytes(0));
     }
 
     function purchaseItemsWithGhst(

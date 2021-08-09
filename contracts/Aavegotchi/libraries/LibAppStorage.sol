@@ -238,6 +238,8 @@ struct AppStorage {
     // mapping(address => uint256[]) petOperatorTokenIds;
     mapping(address => bool) itemManagers;
     mapping(address => GameManager) gameManagers;
+    // contract address for voucher erc1155
+    address voucherContract;
 }
 
 library LibAppStorage {

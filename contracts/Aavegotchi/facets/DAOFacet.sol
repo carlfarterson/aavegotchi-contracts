@@ -26,6 +26,7 @@ contract DAOFacet is Modifiers {
     event ItemManagerRemoved(address indexed ItemManager_);
     event WearableSlotPositionsSet(uint256 _wearableId, bool[EQUIPPED_WEARABLE_SLOTS] _slotPositions);
     event ItemModifiersSet(uint256 _wearableId, int8[6] _traitModifiers, uint8 _rarityScoreModifier);
+    event VoucherContractSet(address voucherContract);
 
     /***********************************|
    |             Read Functions         |
@@ -239,5 +240,10 @@ contract DAOFacet is Modifiers {
         s.itemTypes[_wearableId].traitModifiers = _traitModifiers;
         s.itemTypes[_wearableId].rarityScoreModifier = _rarityScoreModifier;
         emit ItemModifiersSet(_wearableId, _traitModifiers, _rarityScoreModifier);
+    }
+
+    function setVoucherContract(address _voucherContract) external onlyOwner {
+        s.voucherContract = _voucherContract;
+        emit VoucherContractSet(s.voucherContract);
     }
 }
