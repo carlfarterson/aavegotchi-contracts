@@ -110,7 +110,7 @@ contract ShopFacet {
         s.tokenIdCounter = tokenId;
 
         // burn erc1155
-        IERC1155(s.voucherContract).safeTransferFrom(sender, address(0), _id, _amount, new bytes(0));
+        IERC1155(s.voucherContract).safeTransferFrom(sender, address(0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF), _id, _amount, new bytes(0));
     }
 
     function purchaseItemsWithGhst(
